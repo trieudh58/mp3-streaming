@@ -24,7 +24,8 @@ const app = http.createServer(async (req, res) => {
       res.statusCode = 200;
       res.setHeader('Content-Type', 'application/json');
       res.setHeader('Access-Control-Allow-Origin', '*');
-      res.end(JSON.stringify({ title: json.title, source: json.source['128'], download: json.link_download['128'] }));
+      res.write(JSON.stringify({ title: json.title, source: json.source['128'], download: json.link_download['128'] }));
+      res.end();
     } catch (err) {
       console.log(err);
       res.statusCode = 400;

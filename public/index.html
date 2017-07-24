@@ -50,6 +50,7 @@
 
 <script>
   const API_PREFIX = 'http://13.228.204.94:7878';
+  // const API_PREFIX = 'http://localhost:7878';
 
   const submitBtn = document.getElementById('submit-btn');
   const searchBox = document.getElementById('search-box');
@@ -111,6 +112,7 @@
             playBtn.setAttribute('class', 'btn btn-sm btn-primary');
             playBtn.innerHTML = 'Play';
             playBtn.addEventListener('click', event => {
+              // console.log(song.id);
               updateAudioSrc(song.id);
             });
             downloadBtn.setAttribute('type', 'button');
@@ -138,18 +140,26 @@
     playingGroup.hidden = false;
     const audio = document.getElementById('audio');
     const audioSrc = document.getElementById('audio-source');
-    window.fetch(API_PREFIX + '/songInfo?id=' + songId)
-      .then(res => res.json())
+    window.fetch(`${API_PREFIX}/songInfo?id=${songId}`, { mode: 'cors' })
+      .then(res => {
+        var contentType = res.headers.get('Content-Type');
+        if (contentType && contentType.includes('application/json')) {
+          return res.json();
+        }
+      })
       .then(json => {
+        console.log(json);
         playingGroup.getElementsByTagName('h4')[0].innerHTML = 'Playing: ' + json.title;
         audioSrc.src = json.source;
-        audio.load();
-        audio.play();
+        setTimeout(() => {
+          audio.load();
+          audio.play();
+        }, 0);
       })
       .catch(err => console.log(err));
   }
   function downloadAudio(songId) {
-    window.fetch(API_PREFIX + '/songInfo?id=' + songId)
+    window.fetch(`${API_PREFIX}/songInfo?id=${songId}`)
       .then(res => res.json())
       .then(json => {
         window.location.href = json.download;
