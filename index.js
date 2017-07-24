@@ -10,7 +10,7 @@ const app = http.createServer(async (req, res) => {
   if (pathName === '/') {
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/html');
-    res.setHeader('Allow-Access-Control-Origin', '*');
+    res.setHeader('Access-Control-Allow-Origin', '*');
     fs.createReadStream('./public/index.html').pipe(res);
   } else if (pathName === '/songInfo') {
     const songId = url.query.id;
@@ -23,7 +23,7 @@ const app = http.createServer(async (req, res) => {
       const json = await fetchSongData(songId);
       res.statusCode = 200;
       res.setHeader('Content-Type', 'application/json');
-      res.setHeader('Allow-Access-Control-Origin', '*');
+      res.setHeader('Access-Control-Allow-Origin', '*');
       res.end(JSON.stringify({ title: json.title, source: json.source['128'], download: json.link_download['128'] }));
     } catch (err) {
       console.log(err);
