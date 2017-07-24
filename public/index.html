@@ -49,6 +49,8 @@
 </body>
 
 <script>
+  const API_PREFIX = 'http://13.228.204.94:7878';
+
   const submitBtn = document.getElementById('submit-btn');
   const searchBox = document.getElementById('search-box');
   const songTable = document.getElementById('result-list');
@@ -136,7 +138,7 @@
     playingGroup.hidden = false;
     const audio = document.getElementById('audio');
     const audioSrc = document.getElementById('audio-source');
-    window.fetch('http://localhost:7878/songInfo?id=' + songId)
+    window.fetch(API_PREFIX + '/songInfo?id=' + songId)
       .then(res => res.json())
       .then(json => {
         playingGroup.getElementsByTagName('h4')[0].innerHTML = 'Playing: ' + json.title;
@@ -147,7 +149,7 @@
       .catch(err => console.log(err));
   }
   function downloadAudio(songId) {
-    window.fetch('http://localhost:7878/songInfo?id=' + songId)
+    window.fetch(API_PREFIX + '/songInfo?id=' + songId)
       .then(res => res.json())
       .then(json => {
         window.location.href = json.download;
