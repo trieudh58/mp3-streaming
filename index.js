@@ -48,7 +48,7 @@ const server = app.listen(7878, () => {
 function fetchSongData(songId) {
   return new Promise((resolve, reject) => {
     request({
-      uri: `http://api.mp3.zing.vn/api/mobile/song/getsonginfo?requestdata={%22id%22:%22${songId}%22}`,
+      uri: `http://api.mp3.zing.vn/api/mobile/song/getsonginfo?requestdata={"id":"${songId}"}`,
       method: 'GET',
       json: true
     }, (err, response, json) => {
