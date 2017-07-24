@@ -1,0 +1,160 @@
+<html>
+
+<head>
+  <meta charset="utf8">
+  <!-- <link href="/public/favicon.ico" rel="icon" type="image/x-icon" /> -->
+  <title>MP3 streaming</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" type="text/css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" type="text/javascript">
+</head>
+
+<body>
+  <div class="container-fluid">
+    <div class="row" style="margin-top: 50px;">
+      <div class="col-xs-10 col-xs-offset-1">
+        <div class="col-xs-6">
+          <div class="col-xs-12">
+            <h4>Which song?</h4>
+          </div>
+          <div class="col-xs-8">
+            <input type="text" id="search-box" class="form-control col-xs-6" name="search-box" placeholder="Eg: Soledad">
+          </div>
+          <div class="col-xs-4">
+            <button type="submit" id="submit-btn" value="submit" name="submit" class="btn btn-info">Search</button>
+          </div>
+        </div>
+        <div class="col-xs-6" id="playing-group">
+          <h4>Playing: None</h4>
+          <audio controls id="audio" controlsList="nodownload" style="width: 600px;">
+            <source id="audio-source" src="" , type="audio/mpeg">
+          </audio>
+        </div>
+      </div>
+    </div>
+    <div class="row" style="margin-top: 20px;">
+      <div class="col-xs-10 col-xs-offset-1">
+        <table id="result-list" class="table">
+          <thead>
+            <th>#</th>
+            <th>Artist</th>
+            <th>Title</th>
+            <th></th>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</body>
+
+<script>
+  const submitBtn = document.getElementById('submit-btn');
+  const searchBox = document.getElementById('search-box');
+  const songTable = document.getElementById('result-list');
+  const playingGroup = document.getElementById('playing-group');
+
+  submitBtn.addEventListener('click', searchSong);
+  searchBox.addEventListener('keypress', event => {
+    if (event.keyCode === 13) {
+      submitBtn.click();
+    }
+  });
+
+  songTable.hidden = true;
+  playingGroup.hidden = true;
+  function searchSong() {
+    while (songTable.rows.length > 1) {
+      songTable.deleteRow(1);
+    }
+    const query = searchBox.value;
+    window.fetch('http://ac.mp3.zing.vn/complete/desktop?type=song&num=10&query=' + query)
+      .then(res => {
+        return res.json();
+      })
+      .then(json => {
+        songTable.hidden = false;
+        const tbody = songTable.getElementsByTagName('tbody')[0];
+        const songList = json.data[0].song;
+
+        if (Array.isArray(songList)) {
+          if (json.top && json.top.type === 'song') {
+            const matched = songList.filter(song => song.id === json.top.id);
+            if (matched.length === 0) {
+              songList.unshift(json.top);
+            }
+          }
+
+          songList.forEach((song, idx) => {
+            const newRow = tbody.insertRow();
+            newRow.insertCell(0).appendChild(document.createTextNode(idx + 1));
+            for (const key in song) {
+              switch (key) {
+                case 'name':
+                  newRow.insertCell().appendChild(document.createTextNode(song[key]));
+                  break;
+                case 'artist':
+                  newRow.insertCell().appendChild(document.createTextNode(song[key]));
+                  break;
+                default:
+              }
+            }
+            const btnToolBar = document.createElement('div');
+            const playBtn = document.createElement('button');
+            const downloadBtn = document.createElement('button');
+
+            btnToolBar.setAttribute('class', 'btn-toolbar');
+
+            playBtn.setAttribute('type', 'button');
+            playBtn.setAttribute('class', 'btn btn-sm btn-primary');
+            playBtn.innerHTML = 'Play';
+            playBtn.addEventListener('click', event => {
+              updateAudioSrc(song.id);
+            });
+            downloadBtn.setAttribute('type', 'button');
+            downloadBtn.setAttribute('class', 'btn btn-sm btn-default');
+            downloadBtn.innerHTML = 'Download';
+            downloadBtn.addEventListener('click', event => {
+              downloadAudio(song.id);
+            });
+
+            btnToolBar.appendChild(playBtn);
+            btnToolBar.appendChild(downloadBtn);
+
+            newRow.insertCell().appendChild(btnToolBar);;
+          });
+          // const topMatched = document.createElement('span');
+          // topMatched.setAttribute('class', 'badge');
+          // topMatched.innerHTML = 'top matched';
+          // tbody.children[0].lastChild.appendChild(topMatched);
+        }
+      })
+      .catch(err => console.log(err));
+  }
+
+  function updateAudioSrc(songId) {
+    playingGroup.hidden = false;
+    const audio = document.getElementById('audio');
+    const audioSrc = document.getElementById('audio-source');
+    window.fetch('http://localhost:7878/songInfo?id=' + songId)
+      .then(res => res.json())
+      .then(json => {
+        playingGroup.getElementsByTagName('h4')[0].innerHTML = 'Playing: ' + json.title;
+        audioSrc.src = json.source;
+        audio.load();
+        audio.play();
+      })
+      .catch(err => console.log(err));
+  }
+  function downloadAudio(songId) {
+    window.fetch('http://localhost:7878/songInfo?id=' + songId)
+      .then(res => res.json())
+      .then(json => {
+        window.location.href = json.download;
+      })
+      .catch(err => console.log(err));
+  }
+
+</script>
+
+</html>
