@@ -140,12 +140,9 @@
     playingGroup.hidden = false;
     const audio = document.getElementById('audio');
     const audioSrc = document.getElementById('audio-source');
-    // window.fetch(`${API_PREFIX}/songInfo?id=${songId}`)
-    console.log(songId);
-    window.fetch(`http://13.228.204.94:7878/songInfo?id=${songId}`)
+    window.fetch(`${API_PREFIX}/songInfo?id=${songId}`)
       .then(res => res.json())
       .then(json => {
-        console.log(json);
         playingGroup.getElementsByTagName('h4')[0].innerHTML = 'Playing: ' + json.title;
         audioSrc.src = json.source;
         setTimeout(() => {
